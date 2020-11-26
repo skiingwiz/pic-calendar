@@ -1,0 +1,154 @@
+<html>
+<head>
+<title>Danser Christmas</title>
+<style TYPE="text/css">
+td, th {text-align:center}
+.date_present {color: red}
+.date_past {color: black}
+.date_future {color: lightgray}
+.date_after {background: lightgray}
+a { color: inherit; text-decoration: none }
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery-migrate.js"></script>
+<script type="text/javascript" src="jquery-cookie.js"></script>
+<script type="text/javascript" src="thickbox/thickbox-compressed.js"></script>
+<link rel="stylesheet" href="thickbox/thickbox.css" type="text/css" media="screen" />
+<SCRIPT LANGUAGE="JavaScript">
+/*******************
+  UTILITY FUNCTIONS
+********************/
+// day of week of month's first day
+function getFirstDay(theYear, theMonth){
+    var firstDate = new Date(theYear,theMonth,1)
+    return firstDate.getDay()
+}
+// number of days in the month
+function getMonthLen(theYear, theMonth) {
+    var oneDay = 1000 * 60 * 60 * 24
+    var thisMonth = new Date(theYear, theMonth, 1)
+    var nextMonth = new Date(theYear, theMonth + 1, 1)
+    var len = Math.ceil((nextMonth.getTime() -
+        thisMonth.getTime())/oneDay)
+    return len
+}
+// create array of English month names
+var theMonths = ["January","February","March","April","May","June","July","August",
+"September","October","November","December"]
+// return IE4+ or W3C DOM reference for an ID
+function getObject(obj) {
+    var theObj
+    if (document.all) {
+        if (typeof obj == "string") {
+            return document.all(obj)
+        } else {
+            return obj.style
+        }
+    }
+    if (document.getElementById) {
+        if (typeof obj == "string") {
+            return document.getElementById(obj)
+        } else {
+            return obj.style
+        }
+    }
+    return null
+}
+
+/************************
+  DRAW CALENDAR CONTENTS
+*************************/
+// clear and re-populate table based on form's selections
+function populateTable() {
+    var today = new Date()
+    var theYear = today.getFullYear()
+    var dayOfMonth = today.getDate()
+    var theMonth = 11   //December
+    // initialize date-dependent variables
+    var firstDay = getFirstDay(theYear, theMonth)
+    var howMany = getMonthLen(theYear, theMonth)
+
+    // fill in month/year in table header
+    getObject("tableHeader").innerHTML = theMonths[theMonth] +
+    " " + theYear
+
+    // initialize vars for table creation
+    var dayCounter = 1
+    var TBody = getObject("tableBody")
+    // clear any existing rows
+    while (TBody.rows.length > 0) {
+        TBody.deleteRow(0)
+    }
+    var newR, newC
+    var done=false
+    while (!done) {
+        // create new row at end
+        newR = TBody.insertRow(TBody.rows.length)
+        for (var i = 0; i < 7; i++) {
+            // create new cell at end of row
+            newC = newR.insertCell(newR.cells.length)
+            $(newC).width(50).height(50)
+            if (TBody.rows.length == 1 && i < firstDay) {
+                continue
+            }
+            if (dayCounter >  howMany) {
+                // no more rows after this one
+                done = true
+                continue
+            }
+
+            var visited = $.cookie("visited_" + dayCounter)
+            if(dayCounter > 25 || dayCounter > dayOfMonth) {
+                $(newC).append(dayCounter)
+            } else if(visited) {
+                $(newC).append("<a href='pics/" + dayCounter + ".jpg' class='thickbox'><img src='thumbs/" + dayCounter + ".jpg' width='50' height='50'/></a>")
+            } else {
+                $(newC).append("<a href='pics/" + dayCounter + ".jpg' class='thickbox' data-day='" + dayCounter + "'>" + dayCounter + "</a>")
+            }
+            if(today.getMonth() < theMonth) {
+                $(newC).addClass('date_future')
+            } else if(dayCounter < dayOfMonth) {
+                $(newC).addClass('date_past')
+            } else if(dayCounter == dayOfMonth) {
+                $(newC).addClass('date_present')
+            //} else if(dayCounter > 25) {
+            //    $(newC).addClass('date_after')
+            } else {
+                $(newC).addClass('date_future')
+            }
+            dayCounter++;
+        }
+
+        $("[data-day]").click(function() { 
+            var thisDay = $(this).attr('data-day');
+            $(this).empty()
+            $(this).append("<img src='thumbs/" + thisDay + ".jpg' width='50' height='50'/>")
+            $.cookie("visited_" + thisDay, true, { expires: 30 })
+        })
+    }
+
+}
+
+$(document).ready(function() {
+    populateTable();
+    tb_init('a.thickbox, area.thickbox, input.thickbox');//pass where to apply thickbox
+    imgLoader = new Image();// preload image
+    imgLoader.src = tb_pathToImage;
+});
+</SCRIPT>
+</head>
+
+<body>
+<H1>The Danser Christmas Calendar</H1>
+<HR>
+<TABLE ID="calendarTable" BORDER=1 ALIGN="center">
+<TR>
+    <TH ID="tableHeader" COLSPAN=7></TH>
+</TR>
+<TR><TH>Sun</TH><TH>Mon</TH><TH>Tue</TH><TH>Wed</TH>
+<TH>Thu</TH><TH>Fri</TH><TH>Sat</TH></TR>
+<TBODY ID="tableBody"></TBODY>
+</TABLE>
+</body>
+</html>
+
