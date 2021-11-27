@@ -1,6 +1,15 @@
 <html>
 <head>
+<meta charset="utf-8"/>
+
 <title>Danser Christmas</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+
 <style TYPE="text/css">
 td, th {text-align:center}
 .date_present {color: red}
@@ -9,11 +18,6 @@ td, th {text-align:center}
 .date_after {background: lightgray}
 a { color: inherit; text-decoration: none }
 </style>
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="jquery-migrate.js"></script>
-<script type="text/javascript" src="jquery-cookie.js"></script>
-<script type="text/javascript" src="thickbox/thickbox-compressed.js"></script>
-<link rel="stylesheet" href="thickbox/thickbox.css" type="text/css" media="screen" />
 <SCRIPT LANGUAGE="JavaScript">
 /*******************
   UTILITY FUNCTIONS
@@ -35,24 +39,21 @@ function getMonthLen(theYear, theMonth) {
 // create array of English month names
 var theMonths = ["January","February","March","April","May","June","July","August",
 "September","October","November","December"]
-// return IE4+ or W3C DOM reference for an ID
+
 function getObject(obj) {
-    var theObj
-    if (document.all) {
-        if (typeof obj == "string") {
-            return document.all(obj)
-        } else {
-            return obj.style
-        }
-    }
-    if (document.getElementById) {
-        if (typeof obj == "string") {
-            return document.getElementById(obj)
-        } else {
-            return obj.style
-        }
-    }
-    return null
+    return document.getElementById(obj)
+}
+
+function getCookie(name) {
+   const c = document.cookie
+       .split('; ')
+       .find(row => row.startsWith(`${name}=`))
+   return c ? c.split('=')[1] : null;
+}
+
+function setCookie(name, value) {
+    // expire after 30 days
+    document.cookie = `${name}=${value};max-age=${30 * 24 * 3600};samesite=Strict`
 }
 
 /************************
@@ -69,8 +70,8 @@ function populateTable() {
     var howMany = getMonthLen(theYear, theMonth)
 
     // fill in month/year in table header
-    getObject("tableHeader").innerHTML = theMonths[theMonth] +
-    " " + theYear
+    getObject("tableHeader").innerHTML =
+        theMonths[theMonth] + " " + theYear
 
     // initialize vars for table creation
     var dayCounter = 1
@@ -87,7 +88,8 @@ function populateTable() {
         for (var i = 0; i < 7; i++) {
             // create new cell at end of row
             newC = newR.insertCell(newR.cells.length)
-            $(newC).width(50).height(50)
+            newC.style.width = '50px'
+            newC.style.height = '50px'
             if (TBody.rows.length == 1 && i < firstDay) {
                 continue
             }
@@ -97,43 +99,56 @@ function populateTable() {
                 continue
             }
 
-            var visited = $.cookie("visited_" + dayCounter)
+            var visited = getCookie("visited_" + dayCounter)
             if(dayCounter > 25 || dayCounter > dayOfMonth) {
-                $(newC).append(dayCounter)
+                newC.innerHTML += dayCounter
             } else if(visited) {
-                $(newC).append("<a href='pics/" + dayCounter + ".jpg' class='thickbox'><img src='thumbs/" + dayCounter + ".jpg' width='50' height='50'/></a>")
+                newC.innerHTML +=`
+                <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal" data-bs-photo="pics/${dayCounter}.jpg" data-day="${dayCounter}">
+                <img src='thumbs/${dayCounter}.jpg' width='50' height='50'/>
+                </a>
+                `
             } else {
-                $(newC).append("<a href='pics/" + dayCounter + ".jpg' class='thickbox' data-day='" + dayCounter + "'>" + dayCounter + "</a>")
+                newC.innerHTML += `
+                <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal" data-bs-photo="pics/${dayCounter}.jpg" data-day="${dayCounter}">
+                  ${dayCounter}
+                </a>
+                `
             }
             if(today.getMonth() < theMonth) {
-                $(newC).addClass('date_future')
+                newC.classList.add('date_future')
             } else if(dayCounter < dayOfMonth) {
-                $(newC).addClass('date_past')
+                newC.classList.add('date_past')
             } else if(dayCounter == dayOfMonth) {
-                $(newC).addClass('date_present')
+                newC.classList.add('date_present')
             //} else if(dayCounter > 25) {
-            //    $(newC).addClass('date_after')
+            //    newC.classList.add('date_after')
             } else {
-                $(newC).addClass('date_future')
+                newC.classList.add('date_future')
             }
             dayCounter++;
         }
-
-        $("[data-day]").click(function() { 
-            var thisDay = $(this).attr('data-day');
-            $(this).empty()
-            $(this).append("<img src='thumbs/" + thisDay + ".jpg' width='50' height='50'/>")
-            $.cookie("visited_" + thisDay, true, { expires: 30 })
-        })
     }
-
 }
 
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function(event) {
     populateTable();
-    tb_init('a.thickbox, area.thickbox, input.thickbox');//pass where to apply thickbox
-    imgLoader = new Image();// preload image
-    imgLoader.src = tb_pathToImage;
+
+    var photoModal = document.getElementById('photoModal')
+    photoModal.addEventListener('show.bs.modal', function (event) {
+      // element that triggered the modal
+      var button = event.relatedTarget
+      var recipient = button.getAttribute('data-bs-photo')
+      var modalBody = photoModal.querySelector('.modal-body img')
+
+      modalBody.src = recipient
+
+      var day = button.getAttribute('data-day')
+      // reset the contents
+      button.innerHTML = ("<img src='thumbs/" + day + ".jpg' width='50' height='50'/>")
+      setCookie("visited_" + day, true)
+    })
+
 });
 </SCRIPT>
 </head>
@@ -149,6 +164,18 @@ $(document).ready(function() {
 <TH>Thu</TH><TH>Fri</TH><TH>Sat</TH></TR>
 <TBODY ID="tableBody"></TBODY>
 </TABLE>
+
+<!-- Photo Modal Dialog -->
+<div class="modal" id="photoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+          <img id="photoModalImg" class="img-fluid"/>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 
