@@ -10,7 +10,7 @@
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
 
-<style TYPE="text/css">
+<style type="text/css">
 td, th {text-align:center}
 .date_present {color: red}
 .date_past {color: black}
@@ -18,10 +18,7 @@ td, th {text-align:center}
 .date_after {background: lightgray}
 a { color: inherit; text-decoration: none }
 </style>
-<SCRIPT LANGUAGE="JavaScript">
-/*******************
-  UTILITY FUNCTIONS
-********************/
+<script language="JavaScript">
 // day of week of month's first day
 function getFirstDay(theYear, theMonth){
     var firstDate = new Date(theYear,theMonth,1)
@@ -150,20 +147,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
     })
 
 });
-</SCRIPT>
+</script>
 </head>
 
 <body>
-<H1>The Danser Christmas Calendar</H1>
-<HR>
-<TABLE ID="calendarTable" BORDER=1 ALIGN="center">
-<TR>
-    <TH ID="tableHeader" COLSPAN=7></TH>
-</TR>
-<TR><TH>Sun</TH><TH>Mon</TH><TH>Tue</TH><TH>Wed</TH>
-<TH>Thu</TH><TH>Fri</TH><TH>Sat</TH></TR>
-<TBODY ID="tableBody"></TBODY>
-</TABLE>
+<h1>The Danser Christmas Calendar</h1>
+<hr>
+<table id="calendarTable" border=1 align="center">
+<tr>
+    <th id="tableHeader" colspan=7></th>
+</tr>
+<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+<th>Thu</th><th>Fri</th><th>Sat</th></tr>
+<tbody id="tableBody"></tbody>
+</table>
 
 <!-- Photo Modal Dialog -->
 <div class="modal" id="photoModal" tabindex="-1">
