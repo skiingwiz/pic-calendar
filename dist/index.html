@@ -61,6 +61,7 @@ function populateTable() {
     var today = new Date()
     var theYear = today.getFullYear()
     var dayOfMonth = today.getDate()
+    var curMonth = today.getMonth()
     var theMonth = 11   //December
     // initialize date-dependent variables
     var firstDay = getFirstDay(theYear, theMonth)
@@ -97,7 +98,7 @@ function populateTable() {
             }
 
             var visited = getCookie("visited_" + dayCounter)
-            if(dayCounter > 25 || dayCounter > dayOfMonth) {
+            if(dayCounter > 25 || dayCounter > dayOfMonth || curMonth != theMonth) {
                 newC.innerHTML += dayCounter
             } else if(visited) {
                 newC.innerHTML +=`
@@ -174,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 </div>
 
 <footer>
-  Copyright 2022 Chris Danser |
+  Copyright 2022-2023 Chris Danser |
   <a data-bs-toggle="collapse" href="#cookieInfo" role="button" aria-expanded="false" aria-controls="cookieInfo">
     Click for Cookie Info
   </a>
